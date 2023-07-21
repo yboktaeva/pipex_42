@@ -19,8 +19,6 @@ static char	*get_cmd(char **paths, char *cmd)
 	char	*command;
 
 	i = 0;
-	if (access(*paths, F_OK) == 0)
-		return (cmd);
 	while (*paths)
 	{
 		tmp = ft_strjoin(*paths, "/");
@@ -31,6 +29,8 @@ static char	*get_cmd(char **paths, char *cmd)
 		free(command);
 		paths++;
 	}
+	if (access(cmd, F_OK) == 0)
+		return (cmd);
 	return (NULL);
 }
 
@@ -46,10 +46,13 @@ void	first_cmd(t_pipex pix, char **argv, char **envp)
 		pix.cmd = get_cmd(pix.path_cmd, pix.args_cmd[0]);
 	else
 		pix.cmd = pix.args_cmd[0];
+	if (pix.cmd == NULL)
+	{
+		msg_sys(ERR_CMD);
+		exit (1);
+	}
 	if (ft_strchr(argv[2], '/') == NULL)
 		pix.cmd = ft_strjoin("/usr/bin/", pix.args_cmd[0]);
-	if (pix.cmd == NULL)
-		msg_sys(ERR_CMD);
 	if (execve(pix.cmd, pix.args_cmd, envp) == -1)
 		msg_error(ERR_EXE);
 	close(pix.pipefd[1]);
@@ -68,10 +71,13 @@ void	second_cmd(t_pipex pix, char **argv, char **envp)
 		pix.cmd = get_cmd(pix.path_cmd, pix.args_cmd[0]);
 	else
 		pix.cmd = pix.args_cmd[0];
+	if (pix.cmd == NULL)
+	{
+		msg_sys(ERR_CMD);
+		exit (1);
+	}
 	if (ft_strchr(argv[3], '/') == NULL)
 		pix.cmd = ft_strjoin("/usr/bin/", pix.args_cmd[0]);
-	if (pix.cmd == NULL)
-		msg_sys(ERR_CMD);
 	if (execve(pix.cmd, pix.args_cmd, envp) == -1)
 		msg_error(ERR_EXE);
 	close(pix.pipefd[0]);
